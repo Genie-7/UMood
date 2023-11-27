@@ -20,7 +20,7 @@ CREATE TABLE `Emotion` (
   CONSTRAINT `emotion_fk` FOREIGN KEY (`User_ID`) REFERENCES `User` (`User_ID`)
 )
 """
-from flask_sqlalchemy import SQLAlchemy
+"""from flask_sqlalchemy import SQLAlchemy
 
 db = SQLAlchemy()
 
@@ -29,4 +29,4 @@ class User(db.Model):
     Create_Time = db.Column(db.DateTime, server_default=db.func.current_timestamp(), nullable=False)
     Password = db.Column(db.String(16), nullable=False)
     Email = db.Column(db.String(16), nullable=False)
-    Type = db.Column(db.Integer, nullable=False)
+    Type = db.Column(db.Integer, nullable=False)"""
