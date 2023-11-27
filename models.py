@@ -28,5 +28,10 @@ class User(db.Model):
     User_ID = db.Column(db.Integer, primary_key=True, autoincrement=True)
     Create_Time = db.Column(db.DateTime, server_default=db.func.current_timestamp(), nullable=False)
     Password = db.Column(db.String(16), nullable=False)
+<<<<<<< HEAD
     Email = db.Column(db.String(16), nullable=False)
     Type = db.Column(db.Integer, nullable=False)"""
+=======
+    Email = db.Column(db.String(120), nullable=False, unique=True)
+    Type = db.Column(db.Integer, nullable=False)
+>>>>>>> UMood_LoginSystem
