@@ -1,11 +1,28 @@
 #imports
 from datetime import datetime, timedelta
-from flask import Flask, jsonify, request
+from flask import Flask, jsonify, request, render_template, session, url_for, redirect
 import sqlite3
+
 
 #initialization and connection config. Config string should not change so long as UMood.db file is in same location as main
 app = Flask(__name__)
-app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///UMood.db'
+app.config['SECRET_KEY'] = 'test'
+
+def get_user_by_id(user_id):
+    con = sqlite3.connect("UMood.db")
+    con.row_factory = sqlite3.Row
+
+    cur = con.cursor()
+    query="SELECT * FROM User WHERE User_ID = ?"
+    cur.execute(query, (user_id))
+
+    row = cur.fetchone()
+    con.close()
+    if row:
+        user = row
+        return user
+    else:
+        return None
 
 #Retreive all users
 def get_all_users():
@@ -37,6 +54,23 @@ def insert_user(user_Id, password, email, type):
         con.close()
         return msg
 
+#register user
+def register_user(password, email, type):
+    try:
+        con = sqlite3.connect("UMood.db")
+        con.row_factory = sqlite3.Row
+        cur = con.cursor()
+        cur.execute("INSERT INTO User (Password, Email, Type) VALUES (?, ?, ?)",
+                    (password, email, type))
+        con.commit()
+        msg = "User successfully registered"
+    except sqlite3.IntegrityError as e:
+        con.rollback()
+        msg = f"Error in the INSERT: {e}"
+    finally:
+        con.close()
+        return msg
+    
 #retreive all emotions records
 def get_all_emotions():
     con = sqlite3.connect("UMood.db")
@@ -85,15 +119,16 @@ def get_emotions_in_interval(start_time, end_time):
     return emotions
 
 @app.route('/')
-def hello():
+def home():
     #function declared to data can change based on desired action ex select or insert get v insert
-    data=get_all_emotions()
-    return jsonify(data)
+    return render_template('home.html')
 
 @app.route('/api/users', methods=['GET', 'POST'])
 def handle_users():
+    #get all users info
     if request.method == 'GET':
         return jsonify(get_all_users())
+    #input(register) user
     if request.method == 'POST':
         user_Id=request.form.get('user_Id')
         password=request.form.get('password')
@@ -123,13 +158,61 @@ def handle_emotions():
         result_msg = insert_emotion(emotion_Id, emotion, device, user_Id)
         return jsonify({"message": result_msg})
     
+@app.route('/register', methods=['GET','POST'])
+def register():
+    if request.method=='POST':
+        email=request.form.get('email')
+        password=request.form.get('password')
+        print("H1"+email+password)
+        result_msg=register_user(password, email, 2)
+        print("H2"+result_msg)
+        if result_msg=="User successfully registered":
+            return redirect(url_for('login'))
+    return render_template('register.html')
+
+@app.route('/login', methods=['GET','POST'])
+def login():
+    if request.method=='POST':
+        password=request.form.get('password')
+        email=request.form.get('email')
+        user = authenticate_user(email, password)
+        if user:
+            # Successful login, perform any additional actions here
+            session['user_id'] = user['User_ID']
+            return redirect(url_for('dashboard'))
+        else:
+            # Invalid credentials, handle accordingly (e.g., show error message)
+            print("Invalid Credentials")
+            return render_template('login.html')
+    return render_template('login.html')
+
+def authenticate_user(email, password):
+    con = sqlite3.connect("UMood.db")
+    con.row_factory = sqlite3.Row
+    cur = con.cursor()
+    # Retrieve user information based on the provided email
+    cur.execute("SELECT * FROM User WHERE Email = ? AND Password = ?", (email, password))
+    user = cur.fetchone()
+    con.close()
+    if user:
+        return user
+    else:
+        return None
+
+@app.route('/dashboard', methods=('GET', 'POST'))
+def dashboard():
+    if 'user_id' in session:
+        user_id = session['user_id']
+        return render_template('dashboard.html', user_id=user_id)
+    else:
+        return 'Not logged in'
+
+@app.route('/logout', methods=['GET', 'POST'])
+def logout():
+    session.pop('user_id', None)
+    return redirect(url_for('login'))
+        
 if __name__ == "__main__":
     app.run(debug=True)
 
-#def 
-# post: contrsuct query based off table args passed for json object ex emotion time then query database 
-
-
-#def 
-# get: within interval table info send 
     

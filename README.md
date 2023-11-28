@@ -20,6 +20,7 @@ CREATE TABLE Emotion (
     FOREIGN KEY (User_ID) REFERENCES User (User_ID),
     UNIQUE (Emotion_ID)
 ); - Should be able to run all in one copy/paste
+NOTE: type 1 is admin type 2 is user
 6: Make sure UMood.db, .venv, .env and wtv else applicable is in .gitignore
 
 After that setup, you should be able to use functions in main to query the database; show table info and insert into tables

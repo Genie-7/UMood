@@ -1,0 +1,3 @@
+Possible next steps:
+- maybe console log sql commands to demonstrate use of db operations
+- adding specific routes for admin purposes? like being able to view all users
