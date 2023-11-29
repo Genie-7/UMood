@@ -2,11 +2,12 @@
 from datetime import datetime, timedelta
 from flask import Flask, jsonify, request, render_template, session, url_for, redirect
 import sqlite3
-
+from flask_cors import CORS
 
 #initialization and connection config. Config string should not change so long as UMood.db file is in same location as main
 app = Flask(__name__)
 app.config['SECRET_KEY'] = 'test'
+CORS(app)
 
 def get_user_by_id(user_id):
     con = sqlite3.connect("UMood.db")
@@ -88,8 +89,8 @@ def insert_emotion(emotion_Id, emotion, device, user_Id):
         con = sqlite3.connect("UMood.db")
         con.row_factory = sqlite3.Row
         cur = con.cursor()
-        cur.execute("INSERT INTO Emotion (Emotion_ID, Emotion, Device, User_ID) VALUES (?, ?, ?, ?)",
-                    (emotion_Id, emotion, device, user_Id))
+        cur.execute("INSERT INTO Emotion (Emotion, Device, User_ID) VALUES (?, ?, ?)",
+                    (emotion, device, user_Id))
         con.commit()
         msg = "Record successfully added to database"
     except:
@@ -140,20 +141,23 @@ def handle_users():
 @app.route('/api/emotions', methods=['GET', 'POST'])
 def handle_emotions():
     if request.method == 'GET':
+        print("a")
         if 'start_time' in request.args:
+            print("ai")
             start_time = request.args.get('start_time')
             start_time = datetime.strptime(start_time, '%Y-%m-%d %H:%M:%S') 
-            end_time = start_time + timedelta(minutes=30)           
+            end_time = start_time + timedelta(minutes=60)           
             emotions = get_emotions_in_interval(start_time, end_time)
             return jsonify(emotions)  
         else: 
+            print("b")
             return jsonify(get_all_emotions())
     elif request.method == 'POST':
         # Access form data
-        emotion_Id = request.form.get('emotion_Id')
-        emotion = request.form.get('emotion')
-        device = request.form.get('device')
-        user_Id = request.form.get('user_Id')
+        emotion_Id = request.json.get('emotion_Id')
+        emotion = request.json.get('emotion')
+        device = request.json.get('device')
+        user_Id = request.json.get('user_Id')
         # Call the insert_emotion function with form data
         result_msg = insert_emotion(emotion_Id, emotion, device, user_Id)
         return jsonify({"message": result_msg})
