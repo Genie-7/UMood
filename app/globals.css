@@ -25,3 +25,24 @@ body {
     )
     rgb(var(--background-start-rgb));
 }
+h1, h2 {
+  text-align: center;
+  text-transform: uppercase;
+  font-weight: 400;
+}
+  
+h1 {
+    font-size: 200%
+}
+.neonText {
+  color: #fff;
+  text-shadow:
+    0 0 7px #fff,
+    0 0 10px #fff,
+    0 0 21px #fff,
+    0 0 42px #e463d3,
+    0 0 45px #e463d3,
+    0 0 45px #e463d3,
+    0 0 50px #e463d3,
+    0 0 50px #e463d3;
+}
